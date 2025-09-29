@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const HomeScreen = () => {
   const [bookData, setBookData] = useState({
@@ -12,6 +13,7 @@ const HomeScreen = () => {
   // Track hover states
   const [isAddHover, setIsAddHover] = useState(false);
   const [isDeleteHover, setIsDeleteHover] = useState(false);
+  const [message, setMessage] = useState("");
 
   const handleInputChange = (name, value) => {
     setBookData((prevState) => ({
@@ -20,8 +22,22 @@ const HomeScreen = () => {
     }));
   };
 
-  const handleSubmit = () => {
-    console.log("Book Data:", bookData);
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/books', bookData);
+      setMessage("Book added successfully!");
+      setBookData({
+        BookID: "",
+        BookTitle: "",
+        BookAvailability: "",
+        BookPrice: "",
+        BookAuthor: "",
+      });
+      setTimeout(() => setMessage(""), 3000);
+    } catch (error) {
+      setMessage("Error adding book: " + (error.response?.data?.message || error.message));
+      setTimeout(() => setMessage(""), 3000);
+    }
   };
 
   const handleDelete = () => {
@@ -34,7 +50,17 @@ const HomeScreen = () => {
         <div style={style.headerLine}></div>
         <h2 style={style.heading}>Insert Book Information</h2>
 
-      <div style={style.inputContainer}>
+        {message && (
+          <div style={{
+            ...style.message,
+            backgroundColor: message.includes("Error") ? "#f8d7da" : "#d4edda",
+            color: message.includes("Error") ? "#721c24" : "#155724"
+          }}>
+            {message}
+          </div>
+        )}
+
+        <div style={style.inputContainer}>
         <input
           style={style.input}
           type="number"
@@ -155,6 +181,19 @@ const style = {
   color: "#1e3a8a",
   marginBottom: "10px",
 },
+headerLine: {
+  width: "100%",
+  height: "2px",
+  backgroundColor: "#1e3a8a",
+  margin: "0 auto 30px auto",
+},
+  message: {
+    padding: "10px",
+    borderRadius: "5px",
+    marginBottom: "20px",
+    textAlign: "center",
+    border: "1px solid transparent",
+  },
 headerLine: {
   width: "100%",
   height: "2px",

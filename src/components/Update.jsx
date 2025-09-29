@@ -1,83 +1,85 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 function Update() {
   const [bookId, setBookId] = useState('');
-  const [showFieldSelection, setShowFieldSelection] = useState(false);
   const [selectedField, setSelectedField] = useState('');
   const [newValue, setNewValue] = useState('');
+  const [message, setMessage] = useState('');
 
-  const handleBookIdSubmit = (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
-    setShowFieldSelection(true);
-  };
-
-  const handleUpdate = (e) => {
-    e.preventDefault();
-    console.log('Updating book:', {
-      bookId,
-      field: selectedField,
-      newValue
-    });
-    // Add your MongoDB update logic here
+    try {
+      const updateData = { [selectedField]: newValue };
+      const response = await axios.put(`http://localhost:5000/api/books/${bookId}`, updateData);
+      setMessage('Book updated successfully!');
+      setBookId('');
+      setSelectedField('');
+      setNewValue('');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      setMessage('Error updating book: ' + (error.response?.data?.message || error.message));
+      setTimeout(() => setMessage(''), 3000);
+    }
   };
 
   return (
     <div style={styles.container}>
-        <h1 style={styles.mainHeading}>Library Management System</h1>
-        <div style={styles.headerLine}></div>
-        <h2 style={styles.heading}>Update Book Information</h2>
+      <h1 style={styles.mainHeading}>Library Management System</h1>
+      <div style={styles.headerLine}></div>
+      <h2 style={styles.heading}>Update Book Information</h2>
       
-      {!showFieldSelection ? (
-        <form onSubmit={handleBookIdSubmit} style={styles.form}>
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Enter Book ID:</label>
-            <input
-              type="text"
-              value={bookId}
-              onChange={(e) => setBookId(e.target.value)}
-              style={styles.input}
-              required
-            />
-          </div>
-          <button type="submit" style={styles.button}>
-            Next
-          </button>
-        </form>
-      ) : (
-        <form onSubmit={handleUpdate} style={styles.form}>
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Select Field to Update:</label>
-            <select
-              value={selectedField}
-              onChange={(e) => setSelectedField(e.target.value)}
-              style={styles.select}
-              required
-            >
-              <option value="">Select a field</option>
-              <option value="title">Book Id</option>
-              <option value="author">Book Title</option>
-              <option value="isbn">Book Availability</option>
-              <option value="category">Book Price</option>
-              <option value="quantity">Book Author</option>
-            </select>
-          </div>
-
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>New Value:</label>
-            <input
-              type="text"
-              value={newValue}
-              onChange={(e) => setNewValue(e.target.value)}
-              style={styles.input}
-              required
-            />
-          </div>
-
-          <button type="submit" style={styles.button}>
-            Update Book
-          </button>
-        </form>
+      {message && (
+        <div style={{
+          ...styles.message,
+          backgroundColor: message.includes("Error") ? "#f8d7da" : "#d4edda",
+          color: message.includes("Error") ? "#721c24" : "#155724"
+        }}>
+          {message}
+        </div>
       )}
+      
+      <form onSubmit={handleUpdate} style={styles.form}>
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Book ID:</label>
+          <input
+            type="text"
+            value={bookId}
+            onChange={(e) => setBookId(e.target.value)}
+            style={styles.input}
+            required
+          />
+        </div>
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Field to Update:</label>
+          <select
+            value={selectedField}
+            onChange={(e) => setSelectedField(e.target.value)}
+            style={styles.select}
+            required
+          >
+            <option value="">Select a field</option>
+            <option value="BookID">Book Id</option>
+            <option value="BookTitle">Book Title</option>
+            <option value="BookAvailability">Book Availability</option>
+            <option value="BookPrice">Book Price</option>
+            <option value="BookAuthor">Book Author</option>
+          </select>
+        </div>
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>New Value:</label>
+          <input
+            type="text"
+            value={newValue}
+            onChange={(e) => setNewValue(e.target.value)}
+            style={styles.input}
+            required
+          />
+        </div>
+        <button type="submit" style={styles.button}>
+          Update Book
+        </button>
+      </form>
     </div>
   );
 }
@@ -107,6 +109,13 @@ headerLine: {
     textAlign: 'center',
     marginBottom: '30px',
     color: '#1e3a8a',
+  },
+  message: {
+    padding: "10px",
+    borderRadius: "5px",
+    marginBottom: "20px",
+    textAlign: "center",
+    border: "1px solid transparent",
   },
   form: {
     backgroundColor: 'white',

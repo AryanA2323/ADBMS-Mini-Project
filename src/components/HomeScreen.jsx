@@ -3,6 +3,8 @@ import Insert from './Insert';
 import Update from './Update';
 import Delete from './Delete';
 import Retrive from './Retrive';
+import SearchByAttribute from './SearchByAttribute';
+import BorrowBook from './BorrowBook';
 
 
 const HomeScreen = () => {
@@ -22,6 +24,13 @@ const HomeScreen = () => {
           >
             Home
           </li>
+          
+          {/* Section Break */}
+          <div style={styles.sectionBreak}></div>
+          
+          {/* CRUD Operations Section */}
+          <div style={styles.sectionHeading}>CRUD Operations</div>
+          
           <li 
             style={{
               ...styles.navItem,
@@ -58,6 +67,31 @@ const HomeScreen = () => {
           >
             Retrieve Book Record
           </li>
+          
+          {/* Section Break */}
+          <div style={styles.sectionBreak}></div>
+          
+          {/* Additional Functionalities Section */}
+          <div style={styles.sectionHeading}>Additional Functionalities</div>
+          
+          <li 
+            style={{
+              ...styles.navItem,
+              ...(activePage === "search" ? styles.activeNavItem : {})
+            }}
+            onClick={() => setActivePage("search")}
+          >
+            Search by Attribute
+          </li>
+          <li 
+            style={{
+              ...styles.navItem,
+              ...(activePage === "borrow" ? styles.activeNavItem : {})
+            }}
+            onClick={() => setActivePage("borrow")}
+          >
+            Borrow a Book
+          </li>
         </ul>
       </div>
 
@@ -80,6 +114,10 @@ const HomeScreen = () => {
           <Update />
         ) : activePage === "retrieve" ? (
           <Retrive />
+        ) : activePage === "search" ? (
+          <SearchByAttribute />
+        ) : activePage === "borrow" ? (
+          <BorrowBook />
         ) : (
           <Delete />
         )}
@@ -121,6 +159,27 @@ const styles = {
   },
   activeNavItem: {
     backgroundColor: "#3b82f6",
+  },
+  separator: {
+    height: "1px",
+    backgroundColor: "#64748b",
+    margin: "15px 0",
+    opacity: "0.5",
+  },
+  sectionBreak: {
+    height: "2px",
+    backgroundColor: "#64748b",
+    margin: "20px 0 15px 0",
+    opacity: "0.7",
+  },
+  sectionHeading: {
+    fontSize: "14px",
+    fontWeight: "bold",
+    color: "#cbd5e1",
+    textTransform: "uppercase",
+    letterSpacing: "1px",
+    marginBottom: "12px",
+    paddingLeft: "15px",
   },
   content: {
     flex: 1,

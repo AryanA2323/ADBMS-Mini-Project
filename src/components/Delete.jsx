@@ -1,84 +1,74 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 function Delete() {
   const [bookId, setBookId] = useState('');
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [message, setMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleDelete = async (e) => {
     e.preventDefault();
-    setConfirmDelete(true);
-  };
-
-  const handleConfirmDelete = () => {
-    console.log('Deleting book with ID:', bookId);
-    // Add your MongoDB delete logic here
-    setConfirmDelete(false);
-    setBookId('');
+    try {
+      await axios.delete(`http://localhost:5000/api/books/${bookId}`);
+      setMessage('Book deleted successfully!');
+      setBookId('');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      setMessage('Error: ' + (error.response?.data?.message || error.message));
+      setTimeout(() => setMessage(''), 3000);
+    }
   };
 
   return (
     <div style={styles.container}>
-        <h1 style={styles.mainHeading}>Library Management System</h1>
-  <div style={styles.headerLine}></div>
-  <h2 style={styles.heading}>Delete Book Record</h2>
+      <h1 style={styles.mainHeading}>Library Management System</h1>
+      <div style={styles.headerLine}></div>
+      <h2 style={styles.heading}>Delete Book Record</h2>
       
-      {!confirmDelete ? (
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Enter Book ID :</label>
-            <input
-              type="text"
-              value={bookId}
-              onChange={(e) => setBookId(e.target.value)}
-              style={styles.input}
-              required
-            />
-          </div>
-          <button type="submit" style={styles.button}>
-            Delete Book
-          </button>
-        </form>
-      ) : (
-        <div style={styles.confirmDialog}>
-          <p style={styles.confirmText}>
-            Are you sure you want to delete book with ID: {bookId}?
-          </p>
-          <div style={styles.buttonGroup}>
-            <button 
-              onClick={handleConfirmDelete}
-              style={{...styles.button, ...styles.deleteButton}}
-            >
-              Confirm Delete
-            </button>
-            <button 
-              onClick={() => setConfirmDelete(false)}
-              style={{...styles.button, ...styles.cancelButton}}
-            >
-              Cancel
-            </button>
-          </div>
+      {message && (
+        <div style={{
+          ...styles.message,
+          backgroundColor: message.includes("Error") ? "#f8d7da" : "#d4edda",
+          color: message.includes("Error") ? "#721c24" : "#155724"
+        }}>
+          {message}
         </div>
       )}
+      
+      <form onSubmit={handleDelete} style={styles.form}>
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Enter Book ID:</label>
+          <input
+            type="text"
+            value={bookId}
+            onChange={(e) => setBookId(e.target.value)}
+            style={styles.input}
+            required
+          />
+        </div>
+        <button type="submit" style={styles.button}>
+          Delete Book
+        </button>
+      </form>
     </div>
   );
 }
 
 const styles = {
-    mainHeading: {
-  fontSize: "32px",
-  fontWeight: "bold",
-  textAlign: "center",
-  color: "#1e3a8a",
-  marginBottom: "10px",
-},
-headerLine: {
-  width: "100%",
-  height: "2px",
-  backgroundColor: "#1e3a8a",
-  margin: "0 auto 30px auto",
-},
+  mainHeading: {
+    fontSize: "32px",
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#1e3a8a",
+    marginBottom: "10px",
+  },
+  headerLine: {
+    width: "100%",
+    height: "2px",
+    backgroundColor: "#1e3a8a",
+    margin: "0 auto 30px auto",
+  },
   container: {
-    maxWidth: '800px',
+    maxWidth: '600px',
     margin: '0 auto',
     padding: '20px',
   },
@@ -88,6 +78,13 @@ headerLine: {
     textAlign: 'center',
     marginBottom: '30px',
     color: '#1e3a8a',
+  },
+  message: {
+    padding: "10px",
+    borderRadius: "5px",
+    marginBottom: "20px",
+    textAlign: "center",
+    border: "1px solid transparent",
   },
   form: {
     backgroundColor: 'white',
@@ -114,7 +111,7 @@ headerLine: {
   button: {
     width: '100%',
     padding: '12px',
-    backgroundColor: '#1e3a8a',
+    backgroundColor: '#dc3545',
     color: 'white',
     border: 'none',
     borderRadius: '5px',
@@ -122,33 +119,6 @@ headerLine: {
     fontWeight: 'bold',
     cursor: 'pointer',
     transition: 'background-color 0.3s ease',
-  },
-  confirmDialog: {
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '10px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-  },
-  confirmText: {
-    fontSize: '16px',
-    color: '#333',
-    marginBottom: '20px',
-    textAlign: 'center',
-  },
-  buttonGroup: {
-    display: 'flex',
-    gap: '10px',
-    justifyContent: 'center',
-  },
-  deleteButton: {
-    backgroundColor: '#dc3545',
-    width: 'auto',
-    padding: '12px 24px',
-  },
-  cancelButton: {
-    backgroundColor: '#6c757d',
-    width: 'auto',
-    padding: '12px 24px',
   }
 };
 

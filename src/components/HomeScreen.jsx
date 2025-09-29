@@ -38,7 +38,7 @@ const HomeScreen = () => {
             }}
             onClick={() => setActivePage("insert")}
           >
-            Insert Book Info
+            Insert Book Record
           </li>
           <li 
             style={{
@@ -47,7 +47,7 @@ const HomeScreen = () => {
             }}
             onClick={() => setActivePage("update")}
           >
-            Update Book Info
+            Update Book Record
           </li>
           <li 
             style={{

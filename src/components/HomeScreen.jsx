@@ -5,6 +5,7 @@ import Delete from './Delete';
 import Retrive from './Retrive';
 import SearchByAttribute from './SearchByAttribute';
 import BorrowBook from './BorrowBook';
+import ReturnBook from './ReturnBook';
 
 
 const HomeScreen = () => {
@@ -92,6 +93,15 @@ const HomeScreen = () => {
           >
             Borrow a Book
           </li>
+          <li 
+            style={{
+              ...styles.navItem,
+              ...(activePage === "return" ? styles.activeNavItem : {})
+            }}
+            onClick={() => setActivePage("return")}
+          >
+            Return a Book
+          </li>
         </ul>
       </div>
 
@@ -118,6 +128,8 @@ const HomeScreen = () => {
           <SearchByAttribute />
         ) : activePage === "borrow" ? (
           <BorrowBook />
+        ) : activePage === "return" ? (
+          <ReturnBook />
         ) : (
           <Delete />
         )}

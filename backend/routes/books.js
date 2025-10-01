@@ -71,6 +71,21 @@ router.get('/search', async (req, res) => {
 });
 
 // GET a specific book by BookID
+router.get('/id/:id', async (req, res) => {
+  try {
+    const book = await Book.findOne({ BookID: req.params.id });
+    if (book == null) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
+    console.log(`🔍 Book ID check: ${book.BookTitle} (ID: ${book.BookID}) exists`);
+    res.json(book);
+  } catch (error) {
+    console.error('❌ Error checking book ID:', error.message);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET a specific book by BookID
 router.get('/:id', async (req, res) => {
   try {
     const book = await Book.findOne({ BookID: req.params.id });

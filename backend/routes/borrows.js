@@ -84,6 +84,37 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET all borrowed books with book details
+router.get('/borrowed', async (req, res) => {
+  try {
+    const borrows = await Borrow.find({ status: 'Active' }).sort({ borrowFromDate: -1 });
+    
+    // Get book details for each borrow
+    const borrowedBooksWithDetails = await Promise.all(
+      borrows.map(async (borrow) => {
+        const book = await Book.findOne({ BookID: borrow.bookId });
+        return {
+          _id: borrow._id,
+          bookId: borrow.bookId,
+          bookTitle: book ? book.BookTitle : 'Unknown Title',
+          bookAuthor: book ? book.BookAuthor : 'Unknown Author',
+          borrowerName: borrow.borrowerName,
+          borrowerPhone: borrow.borrowerPhone,
+          borrowFromDate: borrow.borrowFromDate,
+          borrowToDate: borrow.borrowToDate,
+          status: borrow.status
+        };
+      })
+    );
+    
+    console.log(`📚 Retrieved borrowed books with details: ${borrowedBooksWithDetails.length} books found`);
+    res.json(borrowedBooksWithDetails);
+  } catch (error) {
+    console.error('❌ Error retrieving borrowed books:', error.message);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // GET borrows by phone number
 router.get('/phone/:phone', async (req, res) => {
   try {
@@ -96,6 +127,48 @@ router.get('/phone/:phone', async (req, res) => {
     res.json(borrows);
   } catch (error) {
     console.error('❌ Error retrieving borrows by phone:', error.message);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// POST - Return a book (delete borrow record and update book status)
+router.post('/return/:id', async (req, res) => {
+  try {
+    const borrow = await Borrow.findById(req.params.id);
+    if (!borrow) {
+      return res.status(404).json({ message: 'Borrow record not found' });
+    }
+    
+    if (borrow.status !== 'Active') {
+      return res.status(400).json({ message: 'Book has already been returned' });
+    }
+    
+    // Update book availability back to Available
+    const book = await Book.findOne({ BookID: borrow.bookId });
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
+    
+    book.BookAvailability = 'Available';
+    await book.save();
+    
+    // Delete the borrow record
+    await Borrow.findByIdAndDelete(req.params.id);
+    
+    console.log(`📚 Book returned and borrow record deleted: ${book.BookTitle} (${borrow.bookId}) by ${borrow.borrowerName}`);
+    
+    res.json({
+      message: 'Book returned successfully',
+      book: {
+        BookID: book.BookID,
+        BookTitle: book.BookTitle,
+        BookAuthor: book.BookAuthor,
+        BookAvailability: book.BookAvailability
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Error returning book:', error.message);
     res.status(500).json({ message: error.message });
   }
 });

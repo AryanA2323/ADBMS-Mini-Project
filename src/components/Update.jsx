@@ -6,6 +6,18 @@ function Update() {
   const [selectedField, setSelectedField] = useState('');
   const [newValue, setNewValue] = useState('');
   const [message, setMessage] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+
+  const showPopup = (message) => {
+    setModalMessage(message);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setModalMessage('');
+  };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
@@ -18,8 +30,12 @@ function Update() {
       setNewValue('');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      setMessage('Error updating book: ' + (error.response?.data?.message || error.message));
-      setTimeout(() => setMessage(''), 3000);
+      if (error.response?.status === 404) {
+        showPopup(`Book with ID "${bookId}" doesn't exist in the database.`);
+      } else {
+        setMessage('Error updating book: ' + (error.response?.data?.message || error.message));
+        setTimeout(() => setMessage(''), 3000);
+      }
     }
   };
 
@@ -80,6 +96,19 @@ function Update() {
           Update Book
         </button>
       </form>
+
+      {/* Modal for ID validation */}
+      {showModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <h3 style={styles.modalTitle}>Book Not Found</h3>
+            <p style={styles.modalMessage}>{modalMessage}</p>
+            <button style={styles.modalButton} onClick={closeModal}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -153,6 +182,50 @@ headerLine: {
     backgroundColor: '#1e3a8a',
     color: 'white',
     border: 'none',
+    borderRadius: '5px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modal: {
+    backgroundColor: 'white',
+    padding: '30px',
+    borderRadius: '10px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    maxWidth: '400px',
+    width: '90%',
+    textAlign: 'center',
+  },
+  modalTitle: {
+    color: '#dc2626',
+    marginBottom: '15px',
+    fontSize: '20px',
+    fontWeight: 'bold',
+  },
+  modalMessage: {
+    marginBottom: '20px',
+    fontSize: '16px',
+    color: '#333',
+    lineHeight: '1.5',
+  },
+  modalButton: {
+    backgroundColor: '#dc2626',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
     borderRadius: '5px',
     fontSize: '16px',
     fontWeight: 'bold',

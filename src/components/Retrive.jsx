@@ -23,6 +23,18 @@ function Retrive() {
   const [allBooks, setAllBooks] = useState([]);
   const [showAllBooks, setShowAllBooks] = useState(false);
   const [message, setMessage] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+
+  const showPopup = (message) => {
+    setModalMessage(message);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setModalMessage('');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,9 +44,13 @@ function Retrive() {
       setMessage('');
       setShowAllBooks(false);  // Hide all books when showing single book
     } catch (error) {
-      setMessage('Error retrieving book: ' + (error.response?.data?.message || error.message));
+      if (error.response?.status === 404) {
+        showPopup(`Book with ID "${bookId}" doesn't exist in the database.`);
+      } else {
+        setMessage('Error retrieving book: ' + (error.response?.data?.message || error.message));
+        setTimeout(() => setMessage(''), 3000);
+      }
       setBookDetails(null);
-      setTimeout(() => setMessage(''), 3000);
     }
   };
 
@@ -199,6 +215,19 @@ function Retrive() {
           <p>The library database is currently empty.</p>
         </div>
       )}
+
+      {/* Modal for ID validation */}
+      {showModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <h3 style={styles.modalTitle}>Book Not Found</h3>
+            <p style={styles.modalMessage}>{modalMessage}</p>
+            <button style={styles.modalButton} onClick={closeModal}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -355,7 +384,51 @@ headerLine: {
     textAlign: 'center',
     display: 'inline-block',
     minWidth: '80px',
-  }
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modal: {
+    backgroundColor: 'white',
+    padding: '30px',
+    borderRadius: '10px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    maxWidth: '400px',
+    width: '90%',
+    textAlign: 'center',
+  },
+  modalTitle: {
+    color: '#dc2626',
+    marginBottom: '15px',
+    fontSize: '20px',
+    fontWeight: 'bold',
+  },
+  modalMessage: {
+    marginBottom: '20px',
+    fontSize: '16px',
+    color: '#333',
+    lineHeight: '1.5',
+  },
+  modalButton: {
+    backgroundColor: '#dc2626',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    borderRadius: '5px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease',
+  },
 };
 
 export default Retrive;
